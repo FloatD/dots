@@ -12,4 +12,9 @@ vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
 -- black python formatting
 vim.keymap.set("n", "<leader>fmp", ":silent !black %<cr>")
 
-vim.keymap.set("n", "<leader>rl", ":silent term love .<cr>")
+vim.keymap.set("n", "<leader>rl", function()
+  local output = vim.fn.system("love .")
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Error running love: " .. output, vim.log.levels.ERROR)
+  end
+end)
