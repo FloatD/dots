@@ -18,3 +18,10 @@ vim.keymap.set("n", "<leader>rl", function()
     vim.notify("Error running love: " .. output, vim.log.levels.ERROR)
   end
 end)
+
+vim.keymap.set("n", "<leader>rc", function()
+  local output = vim.fn.system("cd build; cmake --build .")
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Error running cmake: " .. output, vim.log.levels.ERROR)
+  end
+end)

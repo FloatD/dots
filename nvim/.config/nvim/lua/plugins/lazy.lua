@@ -30,19 +30,18 @@ require('lazy').setup({
         },
     },
 
-    {
-        "FloatD/robotframework-neovim",
-        lazy = false, -- Load immediately for testing
-        config = function()
-            vim.cmd("syntax on")
-            vim.filetype.add({
-                extension = {
-                    robot = "robot",
-                    rst = "rst",
-                },
-            })
-        end,
-    },
+    -- {
+    --     "FloatD/robotframework-neovim",
+    --     lazy = false, -- Load immediately for testing
+    --     config = function()
+    --         vim.cmd("syntax on")
+    --         vim.filetype.add({
+    --             extension = {
+    --                 robot = "robot",
+    --             },
+    --         })
+    --     end,
+    -- },
 
     -- Fuzzy Finder (files, lsp, etc)
     { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -90,103 +89,144 @@ require('lazy').setup({
         build = function() vim.fn["mkdp#util#install"]() end,
     },
 
-    -- LSP zero
+    -- Tree-sitter for better syntax highlighting
     {
-        'VonHeikemen/lsp-zero.nvim',
-        branch = 'v3.x',
-        lazy = true,
-        config = false,
-        init = function()
-            -- Disable automatic setup, we are doing it manually
-            vim.g.lsp_zero_extend_cmp = 0
-            vim.g.lsp_zero_extend_lspconfig = 0
+        'nvim-treesitter/nvim-treesitter',
+        run = function()
+            require('nvim-treesitter.install').update({ with_sync = true })
+        end,
+        config = function()
+            require('nvim-treesitter.configs').setup {
+                ensure_installed = { "c", "cpp", "lua", "python", "javascript", "html", "css", "markdown", "robot" },
+                highlight = {
+                    enable = true, -- false will disable the whole extension
+                },
+                autopairs = {
+                    enable = true,
+                },
+            }
         end,
     },
+
     {
-        'williamboman/mason.nvim',
-        lazy = false,
-        config = true,
+        "windwp/nvim-autopairs",
+        event = "InsertEnter",
+            config = function()
+            require("nvim-autopairs").setup({
+                check_ts = true, -- Enable Tree-sitter integration
+            })
+
+            -- Optional: Integrate with nvim-cmp for autocompletion
+            local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+            local cmp = require("cmp")
+            cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+        end,
     },
 
-    -- Autocompletion
+    -- Autocompletion (nvim-cmp)
     {
-        'hrsh7th/nvim-cmp',
-        event = 'InsertEnter',
+        "hrsh7th/nvim-cmp", -- The main autocompletion plugin
         dependencies = {
-            { 'L3MON4D3/LuaSnip' },
+            "hrsh7th/cmp-nvim-lsp", -- LSP source for nvim-cmp
+            "hrsh7th/cmp-buffer", -- Buffer source for nvim-cmp
+            "hrsh7th/cmp-path", -- Path source for nvim-cmp
+            "hrsh7th/cmp-cmdline", -- Cmdline source for nvim-cmp
+            "saadparwaiz1/cmp_luasnip", -- LuaSnip source for nvim-cmp
+            "L3MON4D3/LuaSnip", -- LuaSnip plugin for snippets
         },
         config = function()
-            -- Here is where you configure the autocompletion settings.
-            local lsp_zero = require('lsp-zero')
-            lsp_zero.extend_cmp()
+            local cmp = require("cmp")
+            local luasnip = require("luasnip")
 
-            -- And you can configure cmp even more, if you want to.
-            local cmp = require('cmp')
-            local cmp_action = lsp_zero.cmp_action()
-
+            -- Setup nvim-cmp
             cmp.setup({
-                formatting = lsp_zero.cmp_format({ details = true }),
+                snippet = {
+                    expand = function(args)
+                        luasnip.lsp_expand(args.body) -- For LuaSnip users
+                    end,
+                },
                 mapping = cmp.mapping.preset.insert({
-                    ['<C-Space>'] = cmp.mapping.complete(),
-                    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-                    ['<C-d>'] = cmp.mapping.scroll_docs(4),
-                    ['<C-f>'] = cmp_action.luasnip_jump_forward(),
-                    ['<C-b>'] = cmp_action.luasnip_jump_backward(),
-                })
+                    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+                    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+                    ["<C-Space>"] = cmp.mapping.complete(),
+                    ["<C-e>"] = cmp.mapping.close(),
+                    -- ["<CR>"] = cmp.mapping.confirm({ select = true }),
+                }),
+                sources = {
+                    { name = "nvim_lsp" },
+                    { name = "buffer" },
+                    { name = "path" },
+                    { name = "cmdline" },
+                    { name = "luasnip" },
+                },
+            })
+
+            -- Setup for command-line completion
+            cmp.setup.cmdline(":", {
+                sources = {
+                    { name = "cmdline" },
+                    { name = "path" },
+                },
+            })
+
+            -- Setup for buffer completion in command mode
+            cmp.setup.cmdline("/", {
+                sources = {
+                    { name = "buffer" },
+                },
+            })
+        end,
+    },
+
+    -- LSP Management and Configuration
+    {
+        "williamboman/mason.nvim",
+        config = function()
+            require("mason").setup()
+        end
+    },
+
+    {
+        "williamboman/mason-lspconfig.nvim",
+        config = function()
+            require("mason-lspconfig").setup({
+                ensure_installed =
+                {
+                  "pyright",
+                  "lua_ls",
+                  "robotframework_ls",
+                  "clangd",
+                },
             })
         end
     },
 
-    -- LSP
     {
-        'neovim/nvim-lspconfig',
-        cmd = { 'LspInfo', 'LspInstall', 'LspStart' },
-        event = { 'BufReadPre', 'BufNewFile' },
-        dependencies = {
-            { 'hrsh7th/cmp-nvim-lsp' },
-            { 'williamboman/mason-lspconfig.nvim' },
-        },
+        "neovim/nvim-lspconfig",
         config = function()
-            -- This is where all the LSP shenanigans will live
-            local lsp_zero = require('lsp-zero')
-            lsp_zero.extend_lspconfig()
+            local lspconfig = require("lspconfig")
+            local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-            --- if you want to know more about lsp-zero and mason.nvim
-            --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
-            lsp_zero.on_attach(function(client, bufnr)
-                -- see :help lsp-zero-keybindings
-                -- to learn the available actions
-                lsp_zero.default_keymaps({ buffer = bufnr })
-            end)
-
-            require('mason-lspconfig').setup({
-                ensure_installed = {
-                    'pylsp',  -- python
-                    'clangd', -- c/c++
-                    'lua_ls', -- lua
-                },
-                handlers = {
-                    lsp_zero.default_setup,
-                    lua_ls = function()
-                        -- (Optional) Configure lua language server for neovim
-                        local lua_opts = lsp_zero.nvim_lua_ls()
-                        require('lspconfig').lua_ls.setup(lua_opts)
-                    end,
-                }
-            })
-
-            -- Python environment
-            local util = require("lspconfig/util")
-            local path = util.path
-            require('lspconfig').pyright.setup {
-                on_attach = on_attach,
-                capabilities = capabilities,
-                before_init = function(_, config)
-                    default_venv_path = path.join(vim.env.HOME, "virtualenvs", "nvim-venv", "bin", "python")
-                    config.settings.python.pythonPath = default_venv_path
-                end,
+            -- LSP setup for specific servers
+            lspconfig.pyright.setup{
+                capabilities = cmp_nvim_lsp.default_capabilities(),
             }
-        end
-    }
+            lspconfig.lua_ls.setup{
+                capabilities = cmp_nvim_lsp.default_capabilities(),
+            }
+            lspconfig.clangd.setup{
+                capabilities = cmp_nvim_lsp.default_capabilities(),
+            }
+            lspconfig.robotframework_ls.setup{
+                capabilities = cmp_nvim_lsp.default_capabilities(),
+            }
 
+            -- Optionally configure other LSP settings
+            vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
+            vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+        end
+    },
+
+    -- end of file
 })
+
