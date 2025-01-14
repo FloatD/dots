@@ -11,8 +11,8 @@ padding.x = 10
 padding.y = 10
 
 [font]
-size = 11
-normal.family = "ComicShanns Nerd Font"
+size = 12
+normal.family = "FantasqueSansM Nerd Font Mono"
 
 [keyboard]
 bindings = [
