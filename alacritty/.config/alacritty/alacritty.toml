@@ -1,0 +1,21 @@
+[general]
+import= [
+    "themes/catppuccin_macchiato.toml"
+]
+
+[env]
+term = "xterm-256color"
+
+[window]
+padding.x = 10
+padding.y = 10
+
+[font]
+size = 11
+normal.family = "ComicShanns Nerd Font"
+
+[keyboard]
+bindings = [
+    { key = "Tab", mods = "Control", chars = "\u001b[27;5;9~" },
+    { key = "Tab", mods = "Control|Shift", chars = "\u001b[27;6;9~" },
+]
