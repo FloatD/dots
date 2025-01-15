@@ -175,6 +175,25 @@ require('lazy').setup({
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
+      -- Function to check if the cursor is on whitespace
+      local is_whitespace = function()
+          local col = vim.fn.col('.') - 1
+          local line = vim.fn.getline('.')
+          local char_under_cursor = string.sub(line, col, col)
+
+          if col == 0 or string.match(char_under_cursor, '%s') then
+              return true
+          else
+              return false
+          end
+      end
+
+      -- Function to check if the cursor is inside a comment using treesitter
+      local is_comment = function()
+          local context = require("cmp.config.context")
+          return context.in_treesitter_capture("comment") == true or context.in_syntax_group("Comment")
+      end
+
       -- Setup nvim-cmp
       cmp.setup({
         snippet = {
@@ -196,6 +215,13 @@ require('lazy').setup({
           { name = "cmdline" },
           { name = "luasnip" },
         },
+        enabled = function()
+            if is_comment() or is_whitespace() then
+                return false;
+            else
+                return true;
+            end
+        end
       })
 
       -- Setup for command-line completion
