@@ -1,4 +1,7 @@
--- vim.g.python3_host_prog = os.getenv("HOME") .. '/virtualenvs/nvim-venv/bin/python' -- python code environment
+vim.cmd("colorscheme catppuccin-macchiato") -- set color theme
+
+vim.opt.termguicolors = true                --bufferline
+require("bufferline").setup {}              --bufferline
 
 vim.cmd('language en_US.utf8')
 vim.o.termguicolors = true
@@ -23,23 +26,6 @@ vim.opt.termguicolors = true -- enable true color support
 
 vim.opt.scrolloff = 8        -- minimum number of lines to keep above and below the cursor
 vim.opt.sidescrolloff = 8    --minimum number of columns to keep above and below the cursor
-
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
-    pattern = "*.py",
-    callback = function()
-        vim.opt.textwidth = 79
-        vim.opt.colorcolumn = "79"
-    end
-}) -- python formatting
-
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
-    pattern = { "*.js", "*.html", "*.css", "*.lua" },
-    callback = function()
-        vim.opt.tabstop = 2
-        vim.opt.softtabstop = 2
-        vim.opt.shiftwidth = 2
-    end
-}) -- javascript formatting
 
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
