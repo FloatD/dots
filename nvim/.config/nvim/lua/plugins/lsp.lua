@@ -16,7 +16,23 @@ return {
 
     config = function()
         require("conform").setup({
-            formatters_by_ft = {}
+            formatters_by_ft = {
+                c = { "my_formatter" },
+            },
+            formatters = {
+                my_formatter = {
+
+                    command = 'clang-format',
+
+                    args = '--style="{BasedOnStyle: llvm, IndentWidth: 4}"',
+
+                },
+
+            },
+            format_on_save = {
+                timeout_ms = 500,
+                lsp_format = false,
+            }
         })
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
@@ -78,7 +94,7 @@ return {
             mapping = cmp.mapping.preset.insert({
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ['<CR>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
@@ -101,4 +117,3 @@ return {
         })
     end
 }
-
