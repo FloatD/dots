@@ -2,6 +2,9 @@ local set = vim.keymap.set
 
 set("n", "<leader>ls", ":ls<cr>")
 
+-- vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.declaration()<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { noremap = true, silent = true })
+
 -- telescope
 set("n", "<leader>fp", ":Telescope git_files<cr>")
 set("n", "<leader>fz", ":Telescope live_grep<cr>")
@@ -30,3 +33,6 @@ vim.api.nvim_set_keymap("i", "<C-E>", "luasnip#choice_active() ? '<Plug>luasnip-
     { silent = true, expr = true })
 vim.api.nvim_set_keymap("s", "<C-E>", "luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'",
     { silent = true, expr = true })
+
+set("n", "<leader>db", ":DapToggleBreakpoint<CR>")
+set("n", "<leader>dr", ":DapContinue<CR>")

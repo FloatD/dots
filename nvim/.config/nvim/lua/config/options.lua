@@ -28,10 +28,14 @@ vim.opt.scrolloff = 8        -- minimum number of lines to keep above and below 
 vim.opt.sidescrolloff = 8    --minimum number of columns to keep above and below the cursor
 
 vim.api.nvim_create_autocmd("BufReadPost", {
-	pattern = "*",
-	callback = function()
-		if vim.fn.line("'\"") > 0 and vim.fn.line("'\"") <= vim.fn.line("$") then
-			vim.cmd("normal! g`\"")
-		end
-	end
+    pattern = "*",
+    callback = function()
+        if vim.fn.line("'\"") > 0 and vim.fn.line("'\"") <= vim.fn.line("$") then
+            vim.cmd("normal! g`\"")
+        end
+    end
 }) -- return to last edit position when opening files
+
+vim.opt.listchars = {
+    leadmultispace = "  ▸ ",
+}
